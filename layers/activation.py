@@ -24,13 +24,13 @@ def activation(selection):
     if selection.lower() == 'none':
         return no_act
     elif selection.lower() == 'sigmoid':
-        return F.Sigmoid
+        return F.sigmoid
     elif selection.lower() == 'relu':
-        return F.ReLU
+        return F.relu
     elif selection.lower() == 'elu':
-        return F.ELU
+        return F.elu
     elif selection.lower() == 'softmax':
-        return F.Softmax
+        return F.softmax
     else:
         raise Exception('Please implement this activation!')
 

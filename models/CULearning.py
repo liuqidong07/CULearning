@@ -33,17 +33,18 @@ class CausalUnlabeled(torch.nn.Module):
         '''
         super(CausalUnlabeled, self).__init__()
         self.n_head = n
-        self.in = inputs.LowFeature(input_dict, em_dim)
-        self.rep = base.DNN(em_dim, r_dim, rh_layers, rh_dim, rh_drop, activation)
+        self.in_ = inputs.LowFeature(input_dict, em_dim)
+        low_dim = em_dim * len(input_dict['cate']) + input_dict['cont']    #compute low feature dim
+        self.rep = base.DNN(low_dim, r_dim, rh_layers, rh_dim, rh_drop, activation)
         self.head = nn.ModuleList([base.DNN(r_dim, 1, ph_layers, ph_dim, ph_drop, activation) for _ in range(n)])
 
 
 
-    def forward(self, x):
-        x = self.in(x)
+    def forward(self, x_cont, x_cate, t):
+        x = self.in_(x_cont, x_cate)
         x = self.rep(x)
-        y = [hh(x) for hh in self.head]
-        return y
+        y = [self.head[t[i][0]](x[i]) for i in range(len(t))]
+        return torch.autograd.Variable(torch.Tensor(y), requires_grad=True)
 
 
 

@@ -9,6 +9,7 @@
 
 # here put the import lib
 import torch
+from torch import long
 import torch.nn as nn
 
 class LowFeature(nn.Module):
@@ -36,12 +37,11 @@ class LowFeature(nn.Module):
         @ x_cont: the input of continuous variables
         @ x_cate: the input of categorical variables
         """
-        em_cate = self.em[0](x_cont[0, :])
+        em_cate = self.em[0](x_cate[:, 0].view(-1, 1).long()).squeeze(1)
         '''concate all embedding vactor of categorical variable'''
         for i in range(1, self.cate_num):
-            em_cate = torch.cat((em_cate, self.em[i](x_cate[i, :])), 1)
-        '''concate embedding vector and continuous features'''
-        y = torch.concat((x_cont, em_cate), 1)
+            em_cate = torch.cat((em_cate, self.em[i](x_cate[:, i].view(-1, 1).long()).squeeze(1)), 1)
+        y = torch.cat((x_cont.float(), em_cate), 1)
 
         return y
 

@@ -53,27 +53,30 @@ def preprocess():
 
     '''scale features'''
     '''scale gpa'''
+    data['topperCgpaScale'] = np.where(data['cgpaScale'] == 0, 0, data['topperCgpa'] / data['cgpaScale'])
+    data['CgpaScale'] = np.where(data['cgpaScale'] == 0, 0, data['cgpa'] / data['cgpaScale'])
     #data['gpaScale'] = data['cgpa'] / data['topperCgpa']
-    #data = data.drop(columns=['cgpa', 'topperCgpa'])
+    data = data.drop(columns=['cgpa', 'topperCgpa', 'cgpaScale'])
     '''Z-score'''
     temp = data[['greQ', 'greV', 'toeflScore']]
     data[['greQ', 'greV', 'toeflScore']] = (temp - temp.mean()) / temp.std()
     '''convert to 0-1'''
-    data['researchExp'] = np.where(data['researchExp'] == 0, 0, 1)
-    data['industryExp'] = np.where(data['industryExp'] == 0, 0, 1)
-    data['specialization'] = np.where(data['specialization'] == 0, 0, 1)
-    data['internExp'] = np.where(data['internExp'] == 0, 0, 1)
-    data['greA'] = np.where(data['greA'] == 0, 0, 1)
-    data['journalPubs'] = np.where(data['journalPubs'] == 0, 0, 1)
-    data['confPubs'] = np.where(data['confPubs'] == 0, 0, 1)
+    #data['researchExp'] = np.where(data['researchExp'] == 0, 0, 1)
+    #data['industryExp'] = np.where(data['industryExp'] == 0, 0, 1)
+    #data['specialization'] = np.where(data['specialization'] == 0, 0, 1)
+    #data['internExp'] = np.where(data['internExp'] == 0, 0, 1)
+    #data['greA'] = np.where(data['greA'] == 0, 0, 1)
+    #data['journalPubs'] = np.where(data['journalPubs'] == 0, 0, 1)
+    #data['confPubs'] = np.where(data['confPubs'] == 0, 0, 1)
+    '''convet string type to numeric type'''
+    data[['journalPubs', 'confPubs']] = data[['journalPubs', 'confPubs']].apply(pd.to_numeric)
 
     '''handle categorical feature'''
     '''label encoding'''
     encoder = LabelEncoder()
-    encoded = data[['userName', 'major', 'program', 'department', 'termAndYear', 'ugCollege', 'univName']].apply(encoder.fit_transform)
-    data[['userName', 'major', 'program', 'department', 'termAndYear', 'ugCollege', 'univName']] = encoded
+    encoded = data[['userName', 'major', 'program', 'department', 'termAndYear', 'ugCollege', 'univName', 'specialization']].apply(encoder.fit_transform)
+    data[['userName', 'major', 'program', 'department', 'termAndYear', 'ugCollege', 'univName', 'specialization']] = encoded
     
-    #TODO: categorical feature encoding
 
     return data
 
@@ -91,6 +94,8 @@ def create_train_test():
     else:
         data = preprocess()
         data.to_csv(out_path)
+    
+    n = data['univName'].nunique()
 
     '''filter admit=1'''
     train_data = data[data['admit'] == 1]
@@ -111,7 +116,7 @@ def create_train_test():
     train_data.to_csv(train_path, index=False)
     test_data.to_csv(test_path, index=False)
 
-    return train_data, test_data
+    return train_data, test_data, n
 
 
 def scoreConversion(feature, data, score_table):
@@ -132,6 +137,6 @@ def scoreConversion(feature, data, score_table):
 
 
 if __name__ == '__main__':
-    create_train_test()
-
+    _, _, n = create_train_test()
+    print(n)
 

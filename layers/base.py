@@ -35,10 +35,10 @@ class DNN(nn.Module):
         self.dropGroup = nn.ModuleList([nn.Dropout(p = drop_rate) for _ in range(hidden_layers)])
 
     def forward(self, x):
-        x = activation(selection=activation)(self.inLinear(x))
+        x = activation(selection=self.activation)(self.inLinear(x))
         for i in range(self.hidden_layers):
-            x = activation(selection=activation)(self.dropGroup[i](self.linearGroup[i](x)))
-        y = activation(selection=activation)(self.outLinear(x))
+            x = activation(selection=self.activation)(self.dropGroup[i](self.linearGroup[i](x)))
+        y = activation(selection=self.activation)(self.outLinear(x))
         return y
 
 
